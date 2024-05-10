@@ -1,0 +1,69 @@
+% Predicado para verificar si un árbol está vacío
+arbol_vacio(nil).
+
+% Predicado para crear un árbol con un solo nodo
+crear_arbol(X, nil, nil, nodo(X, nil, nil)).
+
+% Predicado para insertar un elemento en un árbol binario
+insertar_elemento(Elemento, nil, nodo(Elemento, nil, nil)).
+
+insertar_elemento(Elemento, nodo(Valor, Izquierda, Derecha), Arbol) :-
+    Elemento =< Valor,
+    insertar_elemento(Elemento, Izquierda, SubArbol),
+    Arbol = nodo(Valor, SubArbol, Derecha).
+
+insertar_elemento(Elemento, nodo(Valor, Izquierda, Derecha), Arbol) :-
+    Elemento > Valor,
+    insertar_elemento(Elemento, Derecha, SubArbol),
+    Arbol = nodo(Valor, Izquierda, SubArbol).
+
+% Predicado para buscar un elemento en un árbol binario
+buscar_elemento(Elemento, nodo(Elemento, _, _)).
+
+buscar_elemento(Elemento, nodo(Valor, Izquierda, _)) :-
+    Elemento < Valor,
+    buscar_elemento(Elemento, Izquierda).
+
+buscar_elemento(Elemento, nodo(_, _, Derecha)) :-
+    buscar_elemento(Elemento, Derecha).
+
+% Predicado para recorrer un árbol en preorden
+recorrido_preorden(nil, []).
+
+recorrido_preorden(nodo(Elemento, Izquierda, Derecha), Lista) :-
+    recorrido_preorden(Izquierda, ListaIzquierda),
+    recorrido_preorden(Derecha, ListaDerecha),
+    append([Elemento|ListaIzquierda], ListaDerecha, Lista).
+
+% Predicado para recorrer un árbol en inorden
+recorrido_inorden(nil, []).
+
+recorrido_inorden(nodo(Elemento, Izquierda, Derecha), Lista) :-
+    recorrido_inorden(Izquierda, ListaIzquierda),
+    recorrido_inorden(Derecha, ListaDerecha),
+    append(ListaIzquierda, [Elemento|ListaDerecha], Lista).
+
+% Predicado para recorrer un árbol en posorden
+recorrido_posorden(nil, []).
+
+recorrido_posorden(nodo(Elemento, Izquierda, Derecha), Lista) :-
+    recorrido_posorden(Izquierda, ListaIzquierda),
+    recorrido_posorden(Derecha, ListaDerecha),
+    append(ListaIzquierda, ListaDerecha, Temp),
+    append(Temp, [Elemento], Lista).
+
+
+% Ejemplo de uso:
+% Crear un árbol vacío
+  ?- arbol_vacio(Arbol).
+  ?- crear_arbol(5, nil, nil, Arbol).
+% Insertar elementos en el árbol creado
+  ?- insertar_elemento(5, Arbol, NuevoArbol), insertar_elemento(3, NuevoArbol, NuevoArbol2), insertar_elemento(7, NuevoArbol2, NuevoArbol3).
+% a. Búsqueda de un elemento en el árbol
+  ?- buscar_elemento(7, NuevoArbol3). % Debería devolver true.
+% b. Recorrido del árbol en preorden
+  ?- recorrido_preorden(NuevoArbol3, ListaPreorden).
+% c. Recorrido del árbol en inorden
+  ?- recorrido_inorden(NuevoArbol3, ListaInorden).
+% d. Recorrido del árbol en posorden
+  ?- recorrido_posorden(NuevoArbol3, ListaPosorden).
