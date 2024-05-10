@@ -1,69 +1,60 @@
-% Predicado para verificar si un árbol está vacío
-arbol_vacio(nil).
-
-% Predicado para crear un árbol con un solo nodo
-crear_arbol(X, nil, nil, nodo(X, nil, nil)).
-
 % Predicado para insertar un elemento en un árbol binario
-insertar_elemento(Elemento, nil, nodo(Elemento, nil, nil)).
-
-insertar_elemento(Elemento, nodo(Valor, Izquierda, Derecha), Arbol) :-
-    Elemento =< Valor,
-    insertar_elemento(Elemento, Izquierda, SubArbol),
-    Arbol = nodo(Valor, SubArbol, Derecha).
-
-insertar_elemento(Elemento, nodo(Valor, Izquierda, Derecha), Arbol) :-
-    Elemento > Valor,
-    insertar_elemento(Elemento, Derecha, SubArbol),
-    Arbol = nodo(Valor, Izquierda, SubArbol).
+insertar(Elemento, empty, tree(Elemento, empty, empty)).
+insertar(Elemento, tree(Raiz, Izquierda, Derecha), tree(Raiz, NuevaIzquierda, Derecha)) :-
+    Elemento =< Raiz,
+    insertar(Elemento, Izquierda, NuevaIzquierda).
+insertar(Elemento, tree(Raiz, Izquierda, Derecha), tree(Raiz, Izquierda, NuevaDerecha)) :-
+    Elemento > Raiz,
+    insertar(Elemento, Derecha, NuevaDerecha).
 
 % Predicado para buscar un elemento en un árbol binario
-buscar_elemento(Elemento, nodo(Elemento, _, _)).
+buscar(Elemento, tree(Elemento, _, _)) :- !.
+buscar(Elemento, tree(Raiz, Izquierda, _)) :-
+    Elemento =< Raiz,
+    buscar(Elemento, Izquierda).
+buscar(Elemento, tree(_, _, Derecha)) :-
+    buscar(Elemento, Derecha).
 
-buscar_elemento(Elemento, nodo(Valor, Izquierda, _)) :-
-    Elemento < Valor,
-    buscar_elemento(Elemento, Izquierda).
+% Predicado para recorrer un árbol binario en preorden
+preorden(empty, []).
+preorden(tree(Raiz, Izquierda, Derecha), [Raiz|Resultado]) :-
+    preorden(Izquierda, ResultadoIzquierda),
+    preorden(Derecha, ResultadoDerecha),
+    append(ResultadoIzquierda, ResultadoDerecha, Resultado).
 
-buscar_elemento(Elemento, nodo(_, _, Derecha)) :-
-    buscar_elemento(Elemento, Derecha).
+% Predicado para recorrer un árbol binario en inorden
+inorden(empty, []).
+inorden(tree(Raiz, Izquierda, Derecha), Resultado) :-
+    inorden(Izquierda, ResultadoIzquierda),
+    inorden(Derecha, ResultadoDerecha),
+    append(ResultadoIzquierda, [Raiz|ResultadoDerecha], Resultado).
 
-% Predicado para recorrer un árbol en preorden
-recorrido_preorden(nil, []).
+% Predicado para recorrer un árbol binario en posorden
+posorden(empty, []).
+posorden(tree(Raiz, Izquierda, Derecha), Resultado) :-
+    posorden(Izquierda, ResultadoIzquierda),
+    posorden(Derecha, ResultadoDerecha),
+    append(ResultadoIzquierda, ResultadoDerecha, Temporal),
+    append(Temporal, [Raiz], Resultado).
 
-recorrido_preorden(nodo(Elemento, Izquierda, Derecha), Lista) :-
-    recorrido_preorden(Izquierda, ListaIzquierda),
-    recorrido_preorden(Derecha, ListaDerecha),
-    append([Elemento|ListaIzquierda], ListaDerecha, Lista).
+% Crear un árbol binario
+crear_arbol(Arbol) :-
+    insertar(5, empty, Temp1),
+    insertar(3, Temp1, Temp2),
+    insertar(8, Temp2, Temp3),
+    insertar(1, Temp3, Temp4),
+    insertar(4, Temp4, Temp5),
+    insertar(7, Temp5, Temp6),
+    insertar(9, Temp6, Arbol).
 
-% Predicado para recorrer un árbol en inorden
-recorrido_inorden(nil, []).
-
-recorrido_inorden(nodo(Elemento, Izquierda, Derecha), Lista) :-
-    recorrido_inorden(Izquierda, ListaIzquierda),
-    recorrido_inorden(Derecha, ListaDerecha),
-    append(ListaIzquierda, [Elemento|ListaDerecha], Lista).
-
-% Predicado para recorrer un árbol en posorden
-recorrido_posorden(nil, []).
-
-recorrido_posorden(nodo(Elemento, Izquierda, Derecha), Lista) :-
-    recorrido_posorden(Izquierda, ListaIzquierda),
-    recorrido_posorden(Derecha, ListaDerecha),
-    append(ListaIzquierda, ListaDerecha, Temp),
-    append(Temp, [Elemento], Lista).
-
-
-% Ejemplo de uso:
-% Crear un árbol vacío
-  ?- arbol_vacio(Arbol).
-  ?- crear_arbol(5, nil, nil, Arbol).
-% Insertar elementos en el árbol creado
-  ?- insertar_elemento(5, Arbol, NuevoArbol), insertar_elemento(3, NuevoArbol, NuevoArbol2), insertar_elemento(7, NuevoArbol2, NuevoArbol3).
 % a. Búsqueda de un elemento en el árbol
-  ?- buscar_elemento(7, NuevoArbol3). % Debería devolver true.
 % b. Recorrido del árbol en preorden
-  ?- recorrido_preorden(NuevoArbol3, ListaPreorden).
 % c. Recorrido del árbol en inorden
-  ?- recorrido_inorden(NuevoArbol3, ListaInorden).
 % d. Recorrido del árbol en posorden
-  ?- recorrido_posorden(NuevoArbol3, ListaPosorden).
+
+crear_arbol(Arbol),
+write('Arbol creado: '), write(Arbol), nl,
+write('Buscar elemento 7: '), buscar(7, Arbol), nl,
+preorden(Arbol, Preorden), write('Preorden: '), write(Preorden), nl,
+inorden(Arbol, Inorden), write('Inorden: '), write(Inorden), nl,
+posorden(Arbol, Posorden), write('Posorden: '), write(Posorden), nl.
